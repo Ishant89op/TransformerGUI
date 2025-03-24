@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformer Losses Analyzer & Efficiency Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.24.2/plotly.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Left Panel - Input Section -->
+    <div class="left-panel">
+        <h1>Transformer Losses Analyzer</h1>
+        
+        <h2>Physical Dimensions</h2>
+
+        <div class="input-group">
+            <label for="coreArea">Core Cross-sectional Area</label>
+            <div class="input-field">
+                <input type="number" id="coreArea" placeholder="Input">
+                <select id="coreAreaUnit">
+                    <option value="0.0001">cm²</option>
+                    <option value="0.01">dm²</option>
+                    <option value="1" selected>m²</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="coreMeanLength">Core Mean Length</label>
+            <div class="input-field">
+                <input type="number" id="coreMeanLength" placeholder="Input">
+                <select id="coreMeanLengthUnit">
+                    <option value="0.01">cm</option>
+                    <option value="0.1">dm</option>
+                    <option value="1" selected>m</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="numberOfSheets">Number Of Sheets</label>
+            <input type="number" id="numberOfSheets" placeholder="Input" min="1" step="1">
+        </div>
+
+        <div class="input-group">
+            <label for="windingLength">Winding Mean Length</label>
+            <div class="input-field">
+                <input type="number" id="windingLength" placeholder="Input">
+                <select id="windingLengthUnit">
+                    <option value="0.01">cm</option>
+                    <option value="0.1">dm</option>
+                    <option value="1" selected>m</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="stackingFactor">Stacking Factor</label>
+            <input type="number" id="stackingFactor" placeholder="Input" min="0.9" max="0.97" step="0.01" value="0.95">
+        </div>
+        
+        <h2>Material Properties</h2>
+        
+        <div class="input-group">
+            <label for="coreType">Core Type</label>
+            <select id="coreType" class="core-type-select">
+                <option value="CRGO">CRGO (Cold Rolled Grain Oriented)</option>
+                <option value="CRNGO">CRNGO (Cold Rolled Non-Grain Oriented)</option>
+                <option value="Amorphous">Amorphous Metal</option>
+                <option value="Ferrite">Ferrite</option>
+                <option value="Nanoc">Nanocrystalline</option>
+            </select>
+            <div class="core-properties" id="coreProperties">
+                Select a core type to see properties
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="windingMaterial">Winding Material</label>
+            <select id="windingMaterial" class="winding-material-select">
+                <option value="copper" selected>Copper</option>
+                <option value="aluminum">Aluminum</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="windingResistancePri">Primary Winding Resistance</label>
+            <div class="input-field">
+                <input type="number" id="windingResistancePri" placeholder="Input">
+                <select id="windingResistancePriUnit">
+                    <option value="0.000001">μΩ</option>
+                    <option value="0.001">mΩ</option>
+                    <option value="1" selected>Ω</option>
+                    <option value="1000">kΩ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="windingResistanceSec">Secondary Winding Resistance</label>
+            <div class="input-field">
+                <input type="number" id="windingResistanceSec" placeholder="Input">
+                <select id="windingResistanceSecUnit">
+                    <option value="0.000001">μΩ</option>
+                    <option value="0.001">mΩ</option>
+                    <option value="1" selected>Ω</option>
+                    <option value="1000">kΩ</option>
+                </select>
+            </div>
+        </div>
+        
+        <h2>Transformer Specifications</h2>
+        <div class="input-group">
+            <label for="ratedPower">Rated Power (VA)</label>
+            <div class="input-field">
+                <input type="number" id="ratedPower" placeholder="Input">
+                <select id="ratedPowerUnit">
+                    <option value="1">VA</option>
+                    <option value="1000" selected>kVA</option>
+                    <option value="1000000">MVA</option>
+                </select>
+            </div>
+            <span id="ratedPowerLimits" class="limits-display"></span>
+        </div>
+        
+        <div class="input-group">
+            <label for="primaryVoltage">Primary Voltage (V)</label>
+            <div class="input-field">
+                <input type="number" id="primaryVoltage" placeholder="Input">
+                <select id="primaryVoltageUnit">
+                    <option value="1">V</option>
+                    <option value="0.001">mV</option>
+                    <option value="1000" selected>kV</option>
+                    <option value="1000000">MV</option>
+                </select>
+            </div>
+            <span id="primaryVoltageLimits" class="limits-display"></span>
+        </div>
+        
+        <div class="input-group">
+            <label for="secondaryVoltage">Secondary Voltage (V)</label>
+            <div class="input-field">
+                <input type="number" id="secondaryVoltage" placeholder="Input">
+                <select id="secondaryVoltageUnit">
+                    <option value="1" selected>V</option>
+                    <option value="0.001">mV</option>
+                    <option value="1000">kV</option>
+                    <option value="1000000">MV</option>
+                </select>
+            </div>
+            <span id="secondaryVoltageLimits" class="limits-display"></span>
+        </div>
+        
+        <div class="input-group">
+            <label for="frequency">Frequency (Hz)</label>
+            <div class="input-field">
+                <input type="number" id="frequency" placeholder="Input">
+                <select id="frequencyUnit">
+                    <option value="1" selected>Hz</option>
+                    <option value="1000">kHz</option>
+                </select>
+            </div>
+            <span id="frequencyLimits" class="limits-display"></span>
+        </div>
+        
+        <h2>Load Conditions</h2>
+        
+        <div id="multipleLoadInputs">
+            <div class="load-input">
+                <input type="number" class="load-value" placeholder="Load percentage">
+                <select class="load-unit">
+                    <option value="0.01" selected>%</option>
+                    <option value="1">p.u.</option>
+                </select>
+                <button class="remove-load">X</button>
+            </div>
+        </div>
+        
+        <button class="add-load-btn" id="addLoadBtn">Add Load Point</button>
+        
+        <button id="generateBtn">Generate Analysis</button>
+    </div>
+    
+    <!-- Right Panel - Graph Display -->
+    <div class="right-panel">
+        <div class="header-actions">
+            <div class="graph-tabs">
+                <div class="graph-tab active" data-graph="ironLossesGraph">Iron Losses</div>
+                <div class="graph-tab" data-graph="copperLossesGraph">Copper Losses</div>
+                <div class="graph-tab" data-graph="strayLossesGraph">Stray Losses</div>
+                <div class="graph-tab" data-graph="efficiencyGraph">Efficiency</div>
+                <div class="graph-tab" data-graph="totalLossesGraph">Total Losses</div>
+            </div>
+            <div class="header-buttons">
+                <button id="circuitBtn" class="circuit-btn">Circuit Diagram</button>
+                <button id="helpBtn" class="help-btn">Calculations</button>
+            </div>
+        </div>
+        
+        <div class="graph-container" id="currentGraph"></div>
+    </div>
+    
+    <!-- Modal for Formulas -->
+    <div id="formulaModal" class="formula-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h1>Formulas & Calculations</h1>
+            
+            <div class="formulas" id="formulasContainer">
+                <div class="formula">
+                    <div class="formula-title">Iron Losses</div>
+                    <div class="formula-equation">P<sub>iron</sub> = P<sub>h</sub> + P<sub>e</sub></div>
+                    <div class="formula-equation">P<sub>h</sub> = K<sub>h</sub> × f × B<sub>max</sub><sup>n</sup> × V<sub>core</sub></div>
+                    <div class="formula-equation">P<sub>e</sub> = K<sub>e</sub> × f² × B<sub>max</sub>² × V<sub>core</sub></div>
+                    <div class="formula-equation">V<sub>core</sub> = A<sub>core</sub> × L<sub>core</sub></div>
+                    <div class="formula-result" id="ironLossResult">No calculation yet</div>
+                </div>
+        
+                <div class="formula">
+                    <div class="formula-title">Copper Losses</div>
+                    <div class="formula-equation">P<sub>cu</sub> = I²<sub>pri</sub> × R<sub>pri</sub> + I²<sub>sec</sub> × R<sub>sec</sub></div>
+                    <div class="formula-result" id="copperLossResult">No calculation yet</div>
+                </div>
+        
+                <div class="formula">
+                    <div class="formula-title">Stray & Dielectric Losses</div>
+                    <div class="formula-equation">P<sub>stray</sub> ≈ 0.01 × P<sub>rated</sub></div>
+                    <div class="formula-result" id="strayLossResult">No calculation yet</div>
+                </div>
+        
+                <div class="formula">
+                    <div class="formula-title">Total Losses</div>
+                    <div class="formula-equation">P<sub>total</sub> = P<sub>iron</sub> + P<sub>cu</sub> + P<sub>stray</sub></div>
+                    <div class="formula-result" id="totalLossResult">No calculation yet</div>
+                </div>
+        
+                <div class="formula">
+                    <div class="formula-title">Efficiency</div>
+                    <div class="formula-equation">η = (P<sub>out</sub> / P<sub>in</sub>) × 100%</div>
+                    <div class="formula-equation">η = P<sub>out</sub> / (P<sub>out</sub> + P<sub>total</sub>) × 100%</div>
+                    <div class="formula-result" id="efficiencyResult">No calculation yet</div>
+                </div>
+                
+                <div class="formula">
+                    <div class="formula-title">Optimal Load</div>
+                    <div class="formula-equation">Optimal load occurs when P<sub>iron</sub> = P<sub>cu</sub></div>
+                    <div class="formula-result" id="optimalLoadResult">No calculation yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="circuitModal" class="circuit-modal">
+        <div class="modal-content">
+            <span class="close-circuit">&times;</span>
+            <h1>Circuit Diagram</h1>
+            <div class="circuit-container">
+                <img id="circuitImage" src="circuit.png" alt="Circuit Diagram">
+            </div>
+        </div>
+    </div>
+    
+    <div id="infoModal" class="info-modal">
+        <div class="modal-content">
+            <span class="close-info">&times;</span>
+            <h1>Transformer Information</h1>
+            
+            <div class="info-section">
+                <h2>Core Materials</h2>
+                <div id="coreMaterialsInfo"></div>
+            </div>
+            
+            <div class="info-section">
+                <h2>Winding Materials</h2>
+                <div id="windingMaterialsInfo"></div>
+            </div>
+            
+            <div class="info-section">
+                <h2>Key Formulas</h2>
+                <div id="keyFormulasInfo"></div>
+            </div>
+        </div>
+    </div>
+    
+    <button id="infoBtn" class="info-btn">?</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
